@@ -1,0 +1,14 @@
+{
+  "id": "folderBag",
+  "requisites": [],
+  "steps": {
+    "1": {
+      "location": "0211",
+      "coordinates": {
+        "x": 62,
+        "y": 33
+      },
+      "requisites": []
+    }
+  }
+}

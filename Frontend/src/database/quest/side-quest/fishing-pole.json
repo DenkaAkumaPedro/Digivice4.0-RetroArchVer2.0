@@ -1,0 +1,44 @@
+{
+  "id": "fishingPole",
+  "requisites": [
+    {
+      "id": "FolderBag"
+    }
+  ],
+  "steps": {
+    "1": {
+      "location": "021F",
+      "coordinates": {
+        "x": 46,
+        "y": 84
+      },
+      "requisites": []
+    },
+    "2": {
+      "location": "0227",
+      "coordinates": {
+        "x": 47,
+        "y": 47
+      },
+      "requisites": []
+    },
+    "3": {
+      "location": "021F",
+      "coordinates": {
+        "x": 46,
+        "y": 84
+      },
+      "requisites": [
+        {
+          "id": "bambooSpear"
+        },
+        {
+          "id": "spiderWeb"
+        },
+        {
+          "id": "redSnapper"
+        }
+      ]
+    }
+  }
+}

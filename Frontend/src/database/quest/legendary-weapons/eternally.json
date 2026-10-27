@@ -1,0 +1,14 @@
+{
+  "id": "eternally",
+  "requisites": [],
+  "steps": {
+    "1": {
+      "location": "0226",
+      "coordinates": {
+        "x": 76,
+        "y": 11
+      },
+      "requisites": []
+    }
+  }
+}

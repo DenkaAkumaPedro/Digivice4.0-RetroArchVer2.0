@@ -1,0 +1,44 @@
+{
+  "id": "driAgentKotemon",
+  "requisites": [
+    {
+      "id": "partyLevel",
+      "type": "partyLevelRange",
+      "min": 60,
+      "max": 90
+    },
+    {
+      "id": "submarimon"
+    }
+  ],
+  "steps": {
+    "1": {
+      "location": "0258",
+      "coordinates": {
+        "x": 41,
+        "y": 67
+      },
+      "requisites": []
+    },
+    "2": {
+      "location": "0241",
+      "coordinates": {
+        "x": 17,
+        "y": 15
+      },
+      "requisites": []
+    },
+    "3": {
+      "location": "0258",
+      "coordinates": {
+        "x": 41,
+        "y": 67
+      },
+      "requisites": [
+        {
+          "id": "kotemonDDNA"
+        }
+      ]
+    }
+  }
+}

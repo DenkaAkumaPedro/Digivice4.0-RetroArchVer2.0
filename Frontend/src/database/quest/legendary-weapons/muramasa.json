@@ -1,0 +1,18 @@
+{
+  "id": "muramasa",
+  "requisites": [
+    {
+      "id": "smellHerb"
+    }
+  ],
+  "steps": {
+    "1": {
+      "location": "0243",
+      "coordinates": {
+        "x": 76,
+        "y": 21
+      },
+      "requisites": []
+    }
+  }
+}

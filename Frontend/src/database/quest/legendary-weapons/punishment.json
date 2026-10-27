@@ -1,0 +1,18 @@
+{
+  "id": "punishment",
+  "requisites": [
+    {
+      "id": "numemon"
+    }
+  ],
+  "steps": {
+    "1": {
+      "location": "0252",
+      "coordinates": {
+        "x": 73,
+        "y": 22
+      },
+      "requisites": []
+    }
+  }
+}

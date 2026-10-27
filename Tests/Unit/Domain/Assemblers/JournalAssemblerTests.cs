@@ -1,0 +1,268 @@
+namespace Tests.Domain.Assemblers;
+
+using Backend.Domain.Assemblers;
+using Backend.Memory.Resources;
+using Backend.Memory.Resources.Journals;
+using Backend.Memory.Resources.Journals.Quests;
+
+public class JournalAssemblerTests
+{
+    [Fact]
+    public void Assemble_ShouldApplyCompletionCascadeToMainQuest()
+    {
+        var resource = new JournalResource
+        {
+            MainQuest = new QuestResource
+            {
+                Id = "1",
+                Requisites = [],
+                Steps = [
+                    new StepResource { Number = 0, Value = 0, Requisites = [] },
+                    new StepResource { Number = 1, Value = 0, Requisites = [] },
+                    new StepResource { Number = 2, Value = 1, Requisites = [] },
+                    new StepResource { Number = 3, Value = 0, Requisites = [] }
+                ]
+            },
+            SideQuests = []
+        };
+
+        var result = JournalAssembler.Assemble(resource);
+
+        Assert.NotNull(result);
+        Assert.Equal(1, result.MainQuest.Steps[0].Value);
+        Assert.Equal(1, result.MainQuest.Steps[1].Value);
+        Assert.Equal(1, result.MainQuest.Steps[2].Value);
+        Assert.Equal(0, result.MainQuest.Steps[3].Value);
+    }
+
+    [Fact]
+    public void Assemble_ShouldNotApplyCompletionCascadeToSideQuests()
+    {
+        var resource = new JournalResource
+        {
+            MainQuest = new QuestResource
+            {
+                Id = "1",
+                Requisites = [],
+                Steps = [new StepResource { Number = 0, Value = 0, Requisites = [] }]
+            },
+            SideQuests = [
+                new QuestResource
+                {
+                    Id = "2",
+                    Requisites = [],
+                    Steps = [
+                        new StepResource { Number = 0, Value = 0, Requisites = [] },
+                        new StepResource { Number = 1, Value = 1, Requisites = [] }
+                    ]
+                }
+            ]
+        };
+
+        var result = JournalAssembler.Assemble(resource);
+
+        Assert.NotNull(result);
+        Assert.Single(result.SideQuests);
+        Assert.Equal(0, result.SideQuests[0].Steps[0].Value);
+        Assert.Equal(1, result.SideQuests[0].Steps[1].Value);
+    }
+
+    [Fact]
+    public void Assemble_ShouldNormalizeDuelIslandWhenTrophyIsObtained()
+    {
+        var resource = new JournalResource
+        {
+            MainQuest = new QuestResource
+            {
+                Id = "mainQuest",
+                Requisites = [],
+                Steps = [new StepResource { Number = 1, Value = 0, Requisites = [] }]
+            },
+            DuelIsland = [
+                new QuestResource
+                {
+                    Id = "asukaTrophy",
+                    Requisites = [],
+                    Steps = [
+                        new StepResource { Number = 1, Value = 0, Requisites = [] },
+                        new StepResource { Number = 2, Value = 0, Requisites = [] },
+                        new StepResource { Number = 3, Value = 0, Requisites = [] },
+                        new StepResource { Number = 4, Value = 0, Requisites = [] },
+                        new StepResource { Number = 5, Value = 0, Requisites = [] },
+                        new StepResource { Number = 6, Value = 1, Requisites = [] }
+                    ]
+                }
+            ]
+        };
+
+        var result = JournalAssembler.Assemble(resource);
+
+        var asukaTrophy = Assert.Single(result.DuelIsland);
+        Assert.Equal(1, asukaTrophy.Steps[0].Value);
+        Assert.Equal(1, asukaTrophy.Steps[1].Value);
+        Assert.Equal(1, asukaTrophy.Steps[2].Value);
+        Assert.Equal(1, asukaTrophy.Steps[3].Value);
+        Assert.Equal(1, asukaTrophy.Steps[4].Value);
+        Assert.Equal(1, asukaTrophy.Steps[5].Value);
+    }
+
+    [Fact]
+    public void Assemble_ShouldNotNormalizeDuelIslandWhenTrophyIsNotObtained()
+    {
+        var resource = new JournalResource
+        {
+            MainQuest = new QuestResource
+            {
+                Id = "mainQuest",
+                Requisites = [],
+                Steps = [new StepResource { Number = 1, Value = 0, Requisites = [] }]
+            },
+            DuelIsland = [
+                new QuestResource
+                {
+                    Id = "asukaTrophy",
+                    Requisites = [],
+                    Steps = [
+                        new StepResource { Number = 1, Value = 0x80, Requisites = [] },
+                        new StepResource { Number = 2, Value = 0x01, Requisites = [] },
+                        new StepResource { Number = 3, Value = 0, Requisites = [] },
+                        new StepResource { Number = 4, Value = 0, Requisites = [] },
+                        new StepResource { Number = 5, Value = 0, Requisites = [] },
+                        new StepResource { Number = 6, Value = 0, Requisites = [] }
+                    ]
+                }
+            ]
+        };
+
+        var result = JournalAssembler.Assemble(resource);
+
+        var asukaTrophy = Assert.Single(result.DuelIsland);
+        Assert.Equal(0x80, asukaTrophy.Steps[0].Value);
+        Assert.Equal(0x01, asukaTrophy.Steps[1].Value);
+        Assert.Equal(0, asukaTrophy.Steps[2].Value);
+        Assert.Equal(0, asukaTrophy.Steps[5].Value);
+    }
+
+    [Fact]
+    public void Assemble_ShouldNormalizeSunTrophyWhenTrophyIsObtained()
+    {
+        var resource = new JournalResource
+        {
+            MainQuest = new QuestResource
+            {
+                Id = "mainQuest",
+                Requisites = [],
+                Steps = [new StepResource { Number = 1, Value = 0, Requisites = [] }]
+            },
+            DuelIsland = [
+                new QuestResource
+                {
+                    Id = "sunTrophy",
+                    Requisites = [
+                        new RequisiteResource { Id = "asukaTrophy", Value = 1 }
+                    ],
+                    Steps = [
+                        new StepResource { Number = 1, Value = 0, Requisites = [] },
+                        new StepResource { Number = 2, Value = 0, Requisites = [] },
+                        new StepResource { Number = 3, Value = 0, Requisites = [] },
+                        new StepResource { Number = 4, Value = 0, Requisites = [] },
+                        new StepResource { Number = 5, Value = 0, Requisites = [] },
+                        new StepResource { Number = 6, Value = 1, Requisites = [] }
+                    ]
+                }
+            ]
+        };
+
+        var result = JournalAssembler.Assemble(resource);
+
+        var sunTrophy = Assert.Single(result.DuelIsland);
+        Assert.Equal(1, sunTrophy.Steps[0].Value);
+        Assert.Equal(1, sunTrophy.Steps[1].Value);
+        Assert.Equal(1, sunTrophy.Steps[2].Value);
+        Assert.Equal(1, sunTrophy.Steps[3].Value);
+        Assert.Equal(1, sunTrophy.Steps[4].Value);
+        Assert.Equal(1, sunTrophy.Steps[5].Value);
+    }
+
+    [Fact]
+    public void Assemble_ShouldSuppressSunTrophyStepsWhenRequisiteIsNotMet()
+    {
+        var resource = new JournalResource
+        {
+            MainQuest = new QuestResource
+            {
+                Id = "mainQuest",
+                Requisites = [],
+                Steps = [new StepResource { Number = 1, Value = 0, Requisites = [] }]
+            },
+            DuelIsland = [
+                new QuestResource
+                {
+                    Id = "sunTrophy",
+                    Requisites = [
+                        new RequisiteResource { Id = "asukaTrophy", Value = 0 }
+                    ],
+                    Steps = [
+                        new StepResource { Number = 1, Value = 0x80, Requisites = [] },
+                        new StepResource { Number = 2, Value = 0x01, Requisites = [] },
+                        new StepResource { Number = 3, Value = 0x02, Requisites = [] },
+                        new StepResource { Number = 4, Value = 0x04, Requisites = [] },
+                        new StepResource { Number = 5, Value = 0x08, Requisites = [] },
+                        new StepResource { Number = 6, Value = 0, Requisites = [] }
+                    ]
+                }
+            ]
+        };
+
+        var result = JournalAssembler.Assemble(resource);
+
+        var sunTrophy = Assert.Single(result.DuelIsland);
+        Assert.Equal(0, sunTrophy.Steps[0].Value);
+        Assert.Equal(0, sunTrophy.Steps[1].Value);
+        Assert.Equal(0, sunTrophy.Steps[2].Value);
+        Assert.Equal(0, sunTrophy.Steps[3].Value);
+        Assert.Equal(0, sunTrophy.Steps[4].Value);
+        Assert.Equal(0, sunTrophy.Steps[5].Value);
+    }
+
+    [Fact]
+    public void Assemble_ShouldSuppressSunTrophyStepsEvenWhenTrophyStepWouldCascade()
+    {
+        var resource = new JournalResource
+        {
+            MainQuest = new QuestResource
+            {
+                Id = "mainQuest",
+                Requisites = [],
+                Steps = [new StepResource { Number = 1, Value = 0, Requisites = [] }]
+            },
+            DuelIsland = [
+                new QuestResource
+                {
+                    Id = "sunTrophy",
+                    Requisites = [
+                        new RequisiteResource { Id = "asukaTrophy", Value = 0 }
+                    ],
+                    Steps = [
+                        new StepResource { Number = 1, Value = 0, Requisites = [] },
+                        new StepResource { Number = 2, Value = 0, Requisites = [] },
+                        new StepResource { Number = 3, Value = 0, Requisites = [] },
+                        new StepResource { Number = 4, Value = 0, Requisites = [] },
+                        new StepResource { Number = 5, Value = 0, Requisites = [] },
+                        new StepResource { Number = 6, Value = 1, Requisites = [] }
+                    ]
+                }
+            ]
+        };
+
+        var result = JournalAssembler.Assemble(resource);
+
+        var sunTrophy = Assert.Single(result.DuelIsland);
+        Assert.Equal(0, sunTrophy.Steps[0].Value);
+        Assert.Equal(0, sunTrophy.Steps[1].Value);
+        Assert.Equal(0, sunTrophy.Steps[2].Value);
+        Assert.Equal(0, sunTrophy.Steps[3].Value);
+        Assert.Equal(0, sunTrophy.Steps[4].Value);
+        Assert.Equal(0, sunTrophy.Steps[5].Value);
+    }
+}
